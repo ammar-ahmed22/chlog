@@ -34,7 +34,6 @@ func getGitLog(from, to string) ([]string, error) {
 	return []string{string(output)}, nil
 }
 
-
 func getCommits(from, to string) ([]string, error) {
 	cmd := exec.Command("git", "rev-list", "--reverse", fmt.Sprintf("%s..%s", from, to))
 	out, err := cmd.Output()
@@ -59,7 +58,7 @@ type Flags struct {
 	Verbose bool
 }
 
-func ParseFlags(cmd *cobra.Command) (*Flags, error) {
+func ParseAndValidateFlags(cmd *cobra.Command) (*Flags, error) {
 	from, err := cmd.Flags().GetString("from")
 	if err != nil {
 		return nil, err
@@ -68,6 +67,16 @@ func ParseFlags(cmd *cobra.Command) (*Flags, error) {
 	if err != nil {
 		return nil, err
 	}
+	err = isValidGitRef(from)
+	if err != nil {
+		return nil, fmt.Errorf("Invalid '--from, -f' reference: '%s'. Make sure it's a valid Git commit, tag, or branch (e.g. 'HEAD', 'main', 'v1.0.0', or 'abc1234')", from)
+	}
+
+	err = isValidGitRef(to)
+	if err != nil {
+		return nil, fmt.Errorf("Invalid '--to, -t' reference: '%s'. Make sure it's a valid Git commit, tag, or branch (e.g. 'HEAD', 'main', 'v1.0.0', or 'abc1234')", to)
+	}
+
 	verbose, err := cmd.Flags().GetBool("verbose")
 	if err != nil {
 		return nil, err
@@ -90,20 +99,9 @@ var generateCmd = &cobra.Command{
 			return err
 		}
 
-		flags, err := ParseFlags(cmd)
+		flags, err := ParseAndValidateFlags(cmd)
 		if err != nil {
 			return err
-		}
-
-		// TODO: Move this to flag parsing
-		err = isValidGitRef(flags.From)
-		if err != nil {
-			return fmt.Errorf("Invalid '--from, -f' reference: '%s'. Make sure it's a valid Git commit, tag, or branch (e.g. 'HEAD', 'main', 'v1.0.0', or 'abc1234')", flags.From)
-		}
-
-		err = isValidGitRef(flags.To)
-		if err != nil {
-			return fmt.Errorf("Invalid '--to, -t' reference: '%s'. Make sure it's a valid Git commit, tag, or branch (e.g. 'HEAD', 'main', 'v1.0.0', or 'abc1234')", flags.To)
 		}
 
 		logs, err := getGitLog(flags.From, flags.To)
