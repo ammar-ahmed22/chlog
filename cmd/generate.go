@@ -6,6 +6,7 @@ package cmd
 import (
 	"fmt"
 	"os/exec"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -24,6 +25,61 @@ func isValidGitRef(ref string) error {
 	return cmd.Run()
 }
 
+func getGitLog(from, to string) ([]string, error) {
+	cmd := exec.Command("git", "log", "--pretty=format:%h %s", from+"..."+to)
+	output, err := cmd.Output()
+	if err != nil {
+		return nil, fmt.Errorf("Error getting git log: %v", err)
+	}
+	return []string{string(output)}, nil
+}
+
+
+func getCommits(from, to string) ([]string, error) {
+	cmd := exec.Command("git", "rev-list", "--reverse", fmt.Sprintf("%s..%s", from, to))
+	out, err := cmd.Output()
+	if err != nil {
+		return nil, fmt.Errorf("Error getting commits: %v", err)
+	}
+	return strings.Split(strings.TrimSpace(string(out)), "\n"), nil
+}
+
+func getCommitDetails(commit string) (string, error) {
+	cmd := exec.Command("git", "show", commit)
+	out, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("Error getting commit details: %v", err)
+	}
+	return string(out), nil
+}
+
+type Flags struct {
+	From    string
+	To      string
+	Verbose bool
+}
+
+func ParseFlags(cmd *cobra.Command) (*Flags, error) {
+	from, err := cmd.Flags().GetString("from")
+	if err != nil {
+		return nil, err
+	}
+	to, err := cmd.Flags().GetString("to")
+	if err != nil {
+		return nil, err
+	}
+	verbose, err := cmd.Flags().GetBool("verbose")
+	if err != nil {
+		return nil, err
+	}
+
+	return &Flags{
+		From:    from,
+		To:      to,
+		Verbose: verbose,
+	}, nil
+}
+
 // generateCmd represents the generate command
 var generateCmd = &cobra.Command{
 	Use:   "generate",
@@ -34,28 +90,49 @@ var generateCmd = &cobra.Command{
 			return err
 		}
 
-		from, err := cmd.Flags().GetString("from")
+		flags, err := ParseFlags(cmd)
 		if err != nil {
-			fmt.Println("Error getting 'from' flag:", err)
-			return err
-		}
-		to, err := cmd.Flags().GetString("to")
-		if err != nil {
-			fmt.Println("Error getting 'to' flag:", err)
 			return err
 		}
 
-		err = isValidGitRef(from)
+		// TODO: Move this to flag parsing
+		err = isValidGitRef(flags.From)
 		if err != nil {
-			return fmt.Errorf("Invalid '--from, -f' reference: '%s'. Make sure it's a valid Git commit, tag, or branch (e.g. 'HEAD', 'main', 'v1.0.0', or 'abc1234')", from) 
+			return fmt.Errorf("Invalid '--from, -f' reference: '%s'. Make sure it's a valid Git commit, tag, or branch (e.g. 'HEAD', 'main', 'v1.0.0', or 'abc1234')", flags.From)
 		}
 
-		err = isValidGitRef(to)
+		err = isValidGitRef(flags.To)
 		if err != nil {
-			return fmt.Errorf("Invalid '--to, -t' reference: '%s'. Make sure it's a valid Git commit, tag, or branch (e.g. 'HEAD', 'main', 'v1.0.0', or 'abc1234')", to) 
+			return fmt.Errorf("Invalid '--to, -t' reference: '%s'. Make sure it's a valid Git commit, tag, or branch (e.g. 'HEAD', 'main', 'v1.0.0', or 'abc1234')", flags.To)
 		}
 
-		fmt.Println("Generating changelog from", from, "to", to)
+		logs, err := getGitLog(flags.From, flags.To)
+		if err != nil {
+			return fmt.Errorf("Error getting git log: %v", err)
+		}
+
+		if flags.Verbose {
+			fmt.Println("Generating changelog for commits:")
+			for _, log := range logs {
+				fmt.Println(log)
+			}
+		}
+
+		commits, err := getCommits(flags.From, flags.To)
+		if err != nil {
+			return fmt.Errorf("Error getting commits: %v", err)
+		}
+
+		historyWithDiff := ""
+		for _, commit := range commits {
+			details, err := getCommitDetails(commit)
+			if err != nil {
+				return err
+			}
+
+			historyWithDiff += fmt.Sprintf("--- COMMIT ---\n%s\n", details)
+		}
+
 		return nil
 	},
 }
@@ -75,4 +152,5 @@ func init() {
 	// generateCmd.Flags().String("fmt", "json", "Output format (json, markdown)")
 	generateCmd.Flags().StringP("from", "f", "HEAD~1", "Starting commit reference (e.g. HEAD~3, main, v1.0.0, or abc1234)")
 	generateCmd.Flags().StringP("to", "t", "HEAD", "Ending commit reference (e.g. HEAD~3, main, v1.0.0, or abc1234)")
+	generateCmd.Flags().BoolP("verbose", "v", false, "Enable verbose output")
 }
