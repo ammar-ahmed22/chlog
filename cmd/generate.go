@@ -5,16 +5,20 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
+	"github.com/ammar-ahmed22/chlog/ai"
 	"github.com/ammar-ahmed22/chlog/git"
 	"github.com/spf13/cobra"
 )
 
-
 type Flags struct {
-	From    string
-	To      string
-	Verbose bool
+	From     string
+	To       string
+	Verbose  bool
+	Provider string
+	Model    string
+	ApiKey   string
 }
 
 func ParseAndValidateFlags(cmd *cobra.Command) (*Flags, error) {
@@ -41,10 +45,51 @@ func ParseAndValidateFlags(cmd *cobra.Command) (*Flags, error) {
 		return nil, err
 	}
 
+	provider, err := cmd.Flags().GetString("provider")
+	if err != nil {
+		return nil, err
+	}
+
+	ok := ai.IsValidProvider(provider)
+	if !ok {
+		return nil, fmt.Errorf("Invalid provider '%s'. Supported providers are: %s", provider, ai.SupportedProviders())
+	}
+
+	model, err := cmd.Flags().GetString("model")
+	if err != nil {
+		return nil, err
+	}
+
+	if model != "" {
+		ok = ai.IsValidModel(provider, model)
+		if !ok {
+			return nil, fmt.Errorf("Invalid model '%s' for provider '%s'. Supported models are: %s", model, provider, ai.ProvidersMap[provider])
+		}
+	} else {
+		model = ai.ProvidersMap[provider][0] // Default to the first model for the provider
+	}
+
+	apiKey, err := cmd.Flags().GetString("apiKey")
+	if err != nil {
+		return nil, err
+	}
+
+	if apiKey == "" {
+		envVar := ai.ProviderEnvVarMap[provider]
+		value, ok := os.LookupEnv(envVar)
+		if !ok {
+			return nil, fmt.Errorf("API key for provider '%s' is required. Set it using the '--apiKey' flag or the environment variable '%s'", provider, envVar)
+		}
+		apiKey = value
+	}
+
 	return &Flags{
-		From:    from,
-		To:      to,
-		Verbose: verbose,
+		From:     from,
+		To:       to,
+		Verbose:  verbose,
+		Provider: provider,
+		Model:    model,
+		ApiKey:   apiKey,
 	}, nil
 }
 
@@ -87,6 +132,8 @@ var generateCmd = &cobra.Command{
 			historyWithDiff += fmt.Sprintf("--- COMMIT ---\n%s\n", details)
 		}
 
+		fmt.Printf("Flags: %+v", flags)
+
 		return nil
 	},
 }
@@ -94,17 +141,10 @@ var generateCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(generateCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// generateCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// generateCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	// generateCmd.Flags().String("fmt", "json", "Output format (json, markdown)")
 	generateCmd.Flags().StringP("from", "f", "HEAD~1", "Starting commit reference (e.g. HEAD~3, main, v1.0.0, or abc1234)")
 	generateCmd.Flags().StringP("to", "t", "HEAD", "Ending commit reference (e.g. HEAD~3, main, v1.0.0, or abc1234)")
 	generateCmd.Flags().BoolP("verbose", "v", false, "Enable verbose output")
+	generateCmd.Flags().StringP("provider", "p", "openai", "LLM provider (see chlog models for available options)")
+	generateCmd.Flags().StringP("model", "m", "", "LLM model (see chlog models for available options and defaults)")
+	generateCmd.Flags().String("apiKey", "", "API key for the LLM provider (can also be set via environment variable, see chlog models for details)")
 }
