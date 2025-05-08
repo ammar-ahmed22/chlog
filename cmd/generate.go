@@ -18,7 +18,7 @@ type Flags struct {
 	Verbose  bool
 	Provider string
 	Model    string
-	ApiKey   string
+	APIKey   string
 }
 
 func ParseAndValidateFlags(cmd *cobra.Command) (*Flags, error) {
@@ -89,7 +89,7 @@ func ParseAndValidateFlags(cmd *cobra.Command) (*Flags, error) {
 		Verbose:  verbose,
 		Provider: provider,
 		Model:    model,
-		ApiKey:   apiKey,
+		APIKey:   apiKey,
 	}, nil
 }
 
@@ -101,6 +101,11 @@ var generateCmd = &cobra.Command{
 		err := git.IsInstalled()
 
 		flags, err := ParseAndValidateFlags(cmd)
+		if err != nil {
+			return err
+		}
+
+		aiClient, err := ai.NewAIClient(flags.Provider, flags.APIKey)
 		if err != nil {
 			return err
 		}
@@ -132,7 +137,13 @@ var generateCmd = &cobra.Command{
 			historyWithDiff += fmt.Sprintf("--- COMMIT ---\n%s\n", details)
 		}
 
-		fmt.Printf("Flags: %+v", flags)
+
+		changelog, err := aiClient.GenerateChangelog(flags.From, flags.To)
+		if err != nil {
+			return fmt.Errorf("Error generating changelog: %v", err)
+		}
+
+		fmt.Println(changelog)
 
 		return nil
 	},

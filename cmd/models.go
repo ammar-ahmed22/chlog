@@ -40,9 +40,9 @@ var modelsCmd = &cobra.Command{
 		if provider == "all" {
 			fmt.Println("Supported providers and models:")
 			fmt.Println()
-			for provider, model := range ai.ProvidersMap {
-				envVar := ai.ProviderEnvVarMap[provider]
-				printModels(provider, model, envVar)
+			for p, model := range ai.ProvidersMap {
+				envVar := ai.ProviderEnvVarMap[p]
+				printModels(p, model, envVar)
 			}
 			return nil
 		}
