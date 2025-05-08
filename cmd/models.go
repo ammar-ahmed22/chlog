@@ -1,6 +1,3 @@
-/*
-Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
@@ -27,7 +24,6 @@ func printModels(provider string, models []string, envVar string) {
 	fmt.Println()
 }
 
-// modelsCmd represents the models command
 var modelsCmd = &cobra.Command{
 	Use:   "models",
 	Short: "List supported models and providers",
@@ -61,14 +57,5 @@ var modelsCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(modelsCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// modelsCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// modelsCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	modelsCmd.Flags().StringP("provider", "p", "all", "The provider to list models for (openai, gemini or all)")
 }
