@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/ammar-ahmed22/chlog/ai"
 	"github.com/ammar-ahmed22/chlog/git"
@@ -15,6 +16,7 @@ type Flags struct {
 	Verbose  bool
 	Provider string
 	Model    string
+	Date     string
 	APIKey   string
 }
 
@@ -80,22 +82,43 @@ func ParseAndValidateFlags(cmd *cobra.Command) (*Flags, error) {
 		apiKey = value
 	}
 
+	date, err := cmd.Flags().GetString("date")
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = time.Parse("2006-01-02", date)
+	if err != nil {
+		return nil, fmt.Errorf("Invalid date format '%s'. Use YYYY-MM-DD format", date)
+	}
+
 	return &Flags{
 		From:     from,
 		To:       to,
 		Verbose:  verbose,
 		Provider: provider,
 		Model:    model,
+		Date:     date,
 		APIKey:   apiKey,
 	}, nil
 }
 
 // generateCmd represents the generate command
 var generateCmd = &cobra.Command{
-	Use:   "generate",
-	Short: "Generates the AI-powered changelog",
+	Use:   fmt.Sprintf("generate <VERSION> (default \"%s\")", time.Now().Format("2006-01-02")),
+	Short: "Generates the AI-powered changelog entry for the specified version",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		err := git.IsInstalled()
+		if err != nil {
+			return err
+		}
+
+		var version string
+		if len(args) > 0 {
+			version = args[0]
+		} else {
+			version = time.Now().Format("2006-01-02")
+		}
 
 		flags, err := ParseAndValidateFlags(cmd)
 		if err != nil {
@@ -113,9 +136,9 @@ var generateCmd = &cobra.Command{
 		}
 
 		if flags.Verbose {
-			fmt.Println("Generating changelog for commits:")
+			fmt.Fprintf(os.Stderr, "Generating changelog entry \"%s\" for commits:\n", version)
 			for _, log := range logs {
-				fmt.Println(log)
+				fmt.Fprintln(os.Stderr, log)
 			}
 		}
 
@@ -133,7 +156,6 @@ var generateCmd = &cobra.Command{
 
 			historyWithDiff += fmt.Sprintf("--- COMMIT ---\n%s\n", details)
 		}
-
 
 		changelog, err := aiClient.GenerateChangelog(flags.From, flags.To)
 		if err != nil {
@@ -155,4 +177,5 @@ func init() {
 	generateCmd.Flags().StringP("provider", "p", "openai", "LLM provider (see chlog models for available options)")
 	generateCmd.Flags().StringP("model", "m", "", "LLM model (see chlog models for available options and defaults)")
 	generateCmd.Flags().String("apiKey", "", "API key for the LLM provider (can also be set via environment variable, see chlog models for details)")
+	generateCmd.Flags().StringP("date", "d", time.Now().Format("2006-01-02"), "Date for the changelog entry in YYYY-MM-DD format")
 }
