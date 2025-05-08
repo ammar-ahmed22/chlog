@@ -105,6 +105,8 @@ var generateCmd = &cobra.Command{
 			return err
 		}
 
+		aiClient, err := ai.NewAIClient(flags.Provider, flags.ApiKey)
+
 		logs, err := git.LogRange(flags.From, flags.To)
 		if err != nil {
 			return fmt.Errorf("Error getting git log: %v", err)
@@ -132,7 +134,8 @@ var generateCmd = &cobra.Command{
 			historyWithDiff += fmt.Sprintf("--- COMMIT ---\n%s\n", details)
 		}
 
-		fmt.Printf("Flags: %+v", flags)
+
+		aiClient.GenerateChangelog(flags.From, flags.To)
 
 		return nil
 	},

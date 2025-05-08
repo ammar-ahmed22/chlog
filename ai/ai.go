@@ -1,7 +1,20 @@
 package ai
 
+import "fmt"
+
 type AIClient interface {
 	GenerateChangelog(from, to string) (string, error)
+}
+
+func NewAIClient(provider, apiKey string) (AIClient, error) {
+	switch provider {
+	case "openai":
+		return NewOpenAIClient(apiKey)
+	case "gemini":
+		return NewGeminiAIClient(apiKey)
+	default:
+		return nil, fmt.Errorf("unsupported provider: %s", provider)
+	}
 }
 
 var ProvidersMap = map[string][]string{
@@ -39,4 +52,3 @@ func IsValidModel(provider, model string) bool {
 	}
 	return false
 }
-
