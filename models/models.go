@@ -16,14 +16,14 @@ type ChangelogEntry struct {
 	Changes []ChangelogChange `json:"changes" jsonschema:"description=Generate a list of changes following the schema using the provided git commits and diffs."`
 }
 
-func GenerateSchema[T any]() any {
+func GenerateSchema[T any]() *jsonschema.Schema {
 	reflector := jsonschema.Reflector{
 		AllowAdditionalProperties: false,
 		DoNotReference:            true,
 	}
 	var v T
 	schema := reflector.Reflect(&v)
-	return schema 
+	return schema
 }
 
 var ChangelogEntrySchema = GenerateSchema[ChangelogEntry]()

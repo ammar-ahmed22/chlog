@@ -33,8 +33,9 @@ You are a changelog generation assistant. Based on the provided Git commits and 
 - Each change should be a single sentence, start with a past-tense verb, and describe what changed.
 - Each change must be tagged appropriately. Valid tags are:
   - "added", "changed", "removed", "deprecated", "security", "fixed"
+- Each change must have at least one tag.
 - Each change should include the commit hash associated with it.
-- You can have multiple changes associated with a single commit, up to your disrection.
+- You can have multiple changes associated with a single commit, up to your discretion.
 - Output must be strictly valid JSON matching the schema. Do not include any explanation or extra text.
 
 ## Version:

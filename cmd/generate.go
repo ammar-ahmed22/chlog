@@ -8,10 +8,11 @@ import (
 
 	"github.com/ammar-ahmed22/chlog/ai"
 	"github.com/ammar-ahmed22/chlog/git"
+	"github.com/ammar-ahmed22/chlog/utils"
 	"github.com/spf13/cobra"
 )
 
-type Flags struct {
+type generateFlags struct {
 	From     string
 	To       string
 	Verbose  bool
@@ -22,7 +23,7 @@ type Flags struct {
 	Pretty   bool
 }
 
-func ParseAndValidateFlags(cmd *cobra.Command) (*Flags, error) {
+func parseGenerateFlags(cmd *cobra.Command) (*generateFlags, error) {
 	from, err := cmd.Flags().GetString("from")
 	if err != nil {
 		return nil, err
@@ -89,17 +90,17 @@ func ParseAndValidateFlags(cmd *cobra.Command) (*Flags, error) {
 		return nil, err
 	}
 
-	pretty, err := cmd.Flags().GetBool("pretty")
-	if err != nil {
-		return nil, err
-	}
-
 	_, err = time.Parse("2006-01-02", date)
 	if err != nil {
 		return nil, fmt.Errorf("Invalid date format '%s'. Use YYYY-MM-DD format", date)
 	}
 
-	return &Flags{
+	pretty, err := cmd.Flags().GetBool("pretty")
+	if err != nil {
+		return nil, err
+	}
+
+	return &generateFlags{
 		From:     from,
 		To:       to,
 		Verbose:  verbose,
@@ -128,7 +129,7 @@ var generateCmd = &cobra.Command{
 			version = time.Now().Format("2006-01-02")
 		}
 
-		flags, err := ParseAndValidateFlags(cmd)
+		flags, err := parseGenerateFlags(cmd)
 		if err != nil {
 			return err
 		}
@@ -144,15 +145,15 @@ var generateCmd = &cobra.Command{
 		}
 
 		if flags.Verbose {
-			fmt.Fprintf(os.Stderr, "Generating changelog entry \"%s\" for commits:\n", version)
+			utils.Eprintf("Generating changelog entry \"%s\" for commits:\n", version)
 			for _, log := range logs {
-				fmt.Fprintln(os.Stderr, log)
+				utils.Eprintln(log)
 			}
 		}
 
 		if flags.Verbose {
-			fmt.Fprintln(os.Stderr, "")
-			fmt.Fprintln(os.Stderr, "Starting AI changelog generation")
+			utils.Eprintln("")
+			utils.Eprintln("Starting AI changelog generation")
 		}
 
 		response, err := aiClient.GenerateChangelogEntry(ai.GenerateChangelogEntryParams{
@@ -167,8 +168,8 @@ var generateCmd = &cobra.Command{
 		}
 
 		if flags.Verbose {
-			fmt.Fprintln(os.Stderr, "Completed AI changelog generation")
-			fmt.Fprintf(os.Stderr, "tokens used: %d (input: %d, output: %d)\n", response.InputTokens+response.OutputTokens, response.InputTokens, response.OutputTokens)
+			utils.Eprintln("Completed AI changelog generation")
+			utils.Eprintf("tokens used: %d (input: %d, output: %d)\n", response.InputTokens+response.OutputTokens, response.InputTokens, response.OutputTokens)
 		}
 
 		if flags.Pretty {

@@ -53,15 +53,15 @@ func CommitHistoryWithDiff(from, to string) (string, error) {
 		return "", fmt.Errorf("Error getting commits: %v", err)
 	}
 
-	historyWithDiff := ""
+	var builder strings.Builder
 	for _, commit := range commits {
 		details, err := CommitDetails(commit)
 		if err != nil {
 			return "", err
 		}
 
-		historyWithDiff += fmt.Sprintf("--- COMMIT ---\n%s\n", details)
+		builder.WriteString(fmt.Sprintf("--- COMMIT ---\n%s\n", details))
 	}
 
-	return historyWithDiff, nil
+	return builder.String(), nil
 }
