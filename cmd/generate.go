@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"time"
@@ -18,6 +19,7 @@ type Flags struct {
 	Model    string
 	Date     string
 	APIKey   string
+	Pretty   bool
 }
 
 func ParseAndValidateFlags(cmd *cobra.Command) (*Flags, error) {
@@ -87,6 +89,11 @@ func ParseAndValidateFlags(cmd *cobra.Command) (*Flags, error) {
 		return nil, err
 	}
 
+	pretty, err := cmd.Flags().GetBool("pretty")
+	if err != nil {
+		return nil, err
+	}
+
 	_, err = time.Parse("2006-01-02", date)
 	if err != nil {
 		return nil, fmt.Errorf("Invalid date format '%s'. Use YYYY-MM-DD format", date)
@@ -100,6 +107,7 @@ func ParseAndValidateFlags(cmd *cobra.Command) (*Flags, error) {
 		Model:    model,
 		Date:     date,
 		APIKey:   apiKey,
+		Pretty:   pretty,
 	}, nil
 }
 
@@ -142,28 +150,40 @@ var generateCmd = &cobra.Command{
 			}
 		}
 
-		commits, err := git.CommitRange(flags.From, flags.To)
-		if err != nil {
-			return fmt.Errorf("Error getting commits: %v", err)
+		if flags.Verbose {
+			fmt.Fprintln(os.Stderr, "")
+			fmt.Fprintln(os.Stderr, "Starting AI changelog generation")
 		}
 
-		historyWithDiff := ""
-		for _, commit := range commits {
-			details, err := git.CommitDetails(commit)
-			if err != nil {
-				return err
-			}
-
-			historyWithDiff += fmt.Sprintf("--- COMMIT ---\n%s\n", details)
-		}
-
-		changelog, err := aiClient.GenerateChangelog(flags.From, flags.To)
+		response, err := aiClient.GenerateChangelogEntry(ai.GenerateChangelogEntryParams{
+			FromCommit: flags.From,
+			ToCommit:   flags.To,
+			Model:      flags.Model,
+			Version:    version,
+			Date:       flags.Date,
+		})
 		if err != nil {
 			return fmt.Errorf("Error generating changelog: %v", err)
 		}
 
-		fmt.Println(changelog)
+		if flags.Verbose {
+			fmt.Fprintln(os.Stderr, "Completed AI changelog generation")
+			fmt.Fprintf(os.Stderr, "tokens used: %d (input: %d, output: %d)\n", response.InputTokens+response.OutputTokens, response.InputTokens, response.OutputTokens)
+		}
 
+		if flags.Pretty {
+			pretty, err := json.MarshalIndent(response.Entry, "", "  ")
+			if err != nil {
+				return fmt.Errorf("Error pretty printing JSON: %v", err)
+			}
+			fmt.Println(string(pretty))
+			return nil
+		}
+		jsonOutput, err := json.Marshal(response.Entry)
+		if err != nil {
+			return fmt.Errorf("Error generating JSON: %v", err)
+		}
+		fmt.Println(string(jsonOutput))
 		return nil
 	},
 }
@@ -178,4 +198,5 @@ func init() {
 	generateCmd.Flags().StringP("model", "m", "", "LLM model (see chlog models for available options and defaults)")
 	generateCmd.Flags().String("apiKey", "", "API key for the LLM provider (can also be set via environment variable, see chlog models for details)")
 	generateCmd.Flags().StringP("date", "d", time.Now().Format("2006-01-02"), "Date for the changelog entry in YYYY-MM-DD format")
+	generateCmd.Flags().Bool("pretty", false, "Prettified JSON output")
 }

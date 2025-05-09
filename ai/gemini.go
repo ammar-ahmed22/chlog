@@ -26,6 +26,6 @@ func NewGeminiAIClient(apiKey string) (*GeminiAIClient, error) {
 // Compile-time check to ensure GeminiAIClient implements AIClient interface
 var _ AIClient = (*GeminiAIClient)(nil)
 
-func (c *GeminiAIClient) GenerateChangelog(from, to string) (string, error) {
-	return "TODO", nil
+func (c *GeminiAIClient) GenerateChangelogEntry(params GenerateChangelogEntryParams) (GenerateChangelogEntryResponse, error) {
+	return GenerateChangelogEntryResponse{}, nil
 }

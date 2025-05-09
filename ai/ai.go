@@ -1,10 +1,53 @@
 package ai
 
-import "fmt"
+import (
+	"fmt"
+	"slices"
+
+	"github.com/ammar-ahmed22/chlog/models"
+)
+
+type GenerateChangelogEntryParams struct {
+	Version    string
+	Date       string
+	FromCommit string
+	ToCommit   string
+	Model      string
+}
+
+type GenerateChangelogEntryResponse struct {
+	Entry        models.ChangelogEntry
+	InputTokens  int
+	OutputTokens int
+}
 
 type AIClient interface {
-	GenerateChangelog(from, to string) (string, error)
+	GenerateChangelogEntry(params GenerateChangelogEntryParams) (GenerateChangelogEntryResponse, error)
 }
+
+var Prompt = `
+You are a changelog generation assistant. Based on the provided Git commits and their diffs, generate a structured changelog entry that adheres exactly to the JSON schema described below.
+
+## Rules:
+- Only use the information provided in the commit messages and diffs.
+- Each change should be a single sentence, start with a past-tense verb, and describe what changed.
+- Each change must be tagged appropriately. Valid tags are:
+  - "added", "changed", "removed", "deprecated", "security", "fixed"
+- Each change should include the commit hash associated with it.
+- You can have multiple changes associated with a single commit, up to your disrection.
+- Output must be strictly valid JSON matching the schema. Do not include any explanation or extra text.
+
+## Version:
+%s
+
+## Date:
+%s
+
+## Git Commits:
+Each commit is shown below with its hash, message, and code diff separated by "--- COMMIT ---".
+
+%s
+	`
 
 func NewAIClient(provider, apiKey string) (AIClient, error) {
 	if apiKey == "" {
@@ -49,10 +92,5 @@ func IsValidModel(provider, model string) bool {
 	if !ok {
 		return false
 	}
-	for _, m := range models {
-		if m == model {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(models, model)
 }
