@@ -14,15 +14,16 @@ import (
 )
 
 type generateFlags struct {
-	From              string
-	To                string
-	Verbose           bool
-	Provider          string
-	Model             string
-	Date              string
-	APIKey            string
-	Pretty            bool
-	ExistingChangelog []models.ChangelogEntry
+	From                  string
+	To                    string
+	Verbose               bool
+	Provider              string
+	Model                 string
+	Date                  string
+	APIKey                string
+	Pretty                bool
+	ExistingChangelog     []models.ChangelogEntry
+	ExistingChangelogPath string
 }
 
 func parseGenerateFlags(cmd *cobra.Command) (*generateFlags, error) {
@@ -116,15 +117,16 @@ func parseGenerateFlags(cmd *cobra.Command) (*generateFlags, error) {
 	}
 
 	return &generateFlags{
-		From:              from,
-		To:                to,
-		Verbose:           verbose,
-		Provider:          provider,
-		Model:             model,
-		Date:              date,
-		APIKey:            apiKey,
-		Pretty:            pretty,
-		ExistingChangelog: existingChangelog,
+		From:                  from,
+		To:                    to,
+		Verbose:               verbose,
+		Provider:              provider,
+		Model:                 model,
+		Date:                  date,
+		APIKey:                apiKey,
+		Pretty:                pretty,
+		ExistingChangelog:     existingChangelog,
+		ExistingChangelogPath: file,
 	}, nil
 }
 
@@ -199,6 +201,19 @@ var generateCmd = &cobra.Command{
 		jsonOutput, err := json.Marshal(response.Entry)
 		if err != nil {
 			return fmt.Errorf("Error generating JSON: %v", err)
+		}
+
+		if flags.ExistingChangelog != nil {
+			if flags.Verbose {
+				utils.Eprintf("Writing to existing changelog file '%s'\n", flags.ExistingChangelogPath)
+			}
+
+			// NOTE: Adding the new entry to the beginning. This is not good for performance but OK for POC.
+			updatedChangelog := append([]models.ChangelogEntry{response.Entry}, flags.ExistingChangelog...)
+			err := utils.WriteChangelogFile(flags.ExistingChangelogPath, updatedChangelog)
+			if err != nil {
+				return fmt.Errorf("Error writing changelog file '%s': %v", flags.ExistingChangelogPath, err)
+			}
 		}
 		fmt.Println(string(jsonOutput))
 		return nil

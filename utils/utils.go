@@ -38,3 +38,15 @@ func ParseAndValidateChangelogFile(path string) ([]models.ChangelogEntry, error)
 
 	return changelog, nil
 }
+
+func WriteChangelogFile(path string, changelog []models.ChangelogEntry) error {
+	contents, err := json.MarshalIndent(changelog, "", "  ")
+	if err != nil {
+		return fmt.Errorf("Error marshalling changelog to JSON: %v", err)
+	}
+	err = os.WriteFile(path, contents, 0644)
+	if err != nil {
+		return fmt.Errorf("Error writing changelog file '%s': %v", path, err)
+	}
+	return nil
+}
