@@ -8,19 +8,21 @@ import (
 
 	"github.com/ammar-ahmed22/chlog/ai"
 	"github.com/ammar-ahmed22/chlog/git"
+	"github.com/ammar-ahmed22/chlog/models"
 	"github.com/ammar-ahmed22/chlog/utils"
 	"github.com/spf13/cobra"
 )
 
 type generateFlags struct {
-	From     string
-	To       string
-	Verbose  bool
-	Provider string
-	Model    string
-	Date     string
-	APIKey   string
-	Pretty   bool
+	From              string
+	To                string
+	Verbose           bool
+	Provider          string
+	Model             string
+	Date              string
+	APIKey            string
+	Pretty            bool
+	ExistingChangelog []models.ChangelogEntry
 }
 
 func parseGenerateFlags(cmd *cobra.Command) (*generateFlags, error) {
@@ -100,15 +102,29 @@ func parseGenerateFlags(cmd *cobra.Command) (*generateFlags, error) {
 		return nil, err
 	}
 
+	file, err := cmd.Flags().GetString("file")
+	if err != nil {
+		return nil, err
+	}
+
+	var existingChangelog []models.ChangelogEntry
+	if file != "" {
+		existingChangelog, err = utils.ParseAndValidateChangelogFile(file)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return &generateFlags{
-		From:     from,
-		To:       to,
-		Verbose:  verbose,
-		Provider: provider,
-		Model:    model,
-		Date:     date,
-		APIKey:   apiKey,
-		Pretty:   pretty,
+		From:              from,
+		To:                to,
+		Verbose:           verbose,
+		Provider:          provider,
+		Model:             model,
+		Date:              date,
+		APIKey:            apiKey,
+		Pretty:            pretty,
+		ExistingChangelog: existingChangelog,
 	}, nil
 }
 
@@ -200,4 +216,5 @@ func init() {
 	generateCmd.Flags().String("apiKey", "", "API key for the LLM provider (can also be set via environment variable, see chlog models for details)")
 	generateCmd.Flags().StringP("date", "d", time.Now().Format("2006-01-02"), "Date for the changelog entry in YYYY-MM-DD format")
 	generateCmd.Flags().Bool("pretty", false, "Prettified JSON output")
+	generateCmd.Flags().String("file", "", "Path to existing changelog JSON file to update with the new entry (should be an array of changelog entries or empty file)")
 }
