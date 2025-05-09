@@ -153,7 +153,7 @@ var generateCmd = &cobra.Command{
 
 		if flags.Verbose {
 			utils.Eprintln("")
-			utils.Eprintln("Starting AI changelog generation")
+			utils.Eprintf("Starting AI changelog generation (provider: %s, model: %s)\n", flags.Provider, flags.Model)
 		}
 
 		response, err := aiClient.GenerateChangelogEntry(ai.GenerateChangelogEntryParams{
