@@ -6,8 +6,6 @@ import (
 	"strings"
 )
 
-
-
 func IsInstalled() error {
 	cmd := exec.Command("git", "--version")
 	err := cmd.Run()
@@ -49,3 +47,21 @@ func CommitDetails(commit string) (string, error) {
 	return string(out), nil
 }
 
+func CommitHistoryWithDiff(from, to string) (string, error) {
+	commits, err := CommitRange(from, to)
+	if err != nil {
+		return "", fmt.Errorf("Error getting commits: %v", err)
+	}
+
+	historyWithDiff := ""
+	for _, commit := range commits {
+		details, err := CommitDetails(commit)
+		if err != nil {
+			return "", err
+		}
+
+		historyWithDiff += fmt.Sprintf("--- COMMIT ---\n%s\n", details)
+	}
+
+	return historyWithDiff, nil
+}
