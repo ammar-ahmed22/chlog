@@ -37,7 +37,7 @@ func (c *OpenAIClient) GenerateChangelogEntry(params GenerateChangelogEntryParam
 
 	historyWithDiff, err := git.CommitHistoryWithDiff(params.FromCommit, params.ToCommit)
 	if err != nil {
-		return GenerateChangelogEntryResponse{}, err
+		return GenerateChangelogEntryResponse{}, fmt.Errorf("failed to get commit history with diff: %v", err)
 	}
 
 	response, err := c.client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{

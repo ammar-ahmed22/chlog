@@ -27,5 +27,6 @@ func NewGeminiAIClient(apiKey string) (*GeminiAIClient, error) {
 var _ AIClient = (*GeminiAIClient)(nil)
 
 func (c *GeminiAIClient) GenerateChangelogEntry(params GenerateChangelogEntryParams) (GenerateChangelogEntryResponse, error) {
+	// TODO: Implement the changelog generation logic using the Gemini API - https://linear.app/ammar-ahmed/issue/CHL-7/prompt-with-schema-response-with-gemini
 	return GenerateChangelogEntryResponse{}, nil
 }
