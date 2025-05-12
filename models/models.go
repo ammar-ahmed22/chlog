@@ -11,8 +11,10 @@ type ChangelogChange struct {
 }
 
 type ChangelogEntry struct {
-	Version string            `json:"version" jsonschema:"description=The version number of the release. Will be provided in the prompt."`
-	Date    string            `json:"date" jsonschema:"description=The date of the release. Will be provided in the prompt."`
+	Version string            `json:"version" jsonschema:"description=The version number of the release. Leave as empty string."`
+	Date    string            `json:"date" jsonschema:"description=The date of the release. Leave as empty string."`
+	FromRef string            `json:"from_ref" jsonschema:"description=The starting commit reference for the changelog entry. Leave as empty string."`
+	ToRef   string            `json:"to_ref" jsonschema:"description=The ending commit reference for the changelog entry. Leave as empty string."`
 	Changes []ChangelogChange `json:"changes" jsonschema:"description=Generate a list of changes following the schema using the provided git commits and diffs."`
 }
 

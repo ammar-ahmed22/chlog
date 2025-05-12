@@ -38,11 +38,19 @@ func (c *GeminiAIClient) GenerateChangelogEntry(params GenerateChangelogEntryPar
 			Properties: map[string]*genai.Schema{
 				"version": {
 					Type:        genai.TypeString,
-					Description: "The version number of the release. Will be provided in the prompt.",
+					Description: "The version number of the release. Leave as empty string.",
 				},
 				"date": {
 					Type:        genai.TypeString,
-					Description: "The date of the release. Will be provided in the prompt.",
+					Description: "The date of the release. Leave as empty string.",
+				},
+				"from_ref": {
+					Type:        genai.TypeString,
+					Description: "The starting commit reference for the changelog entry. Leave as empty string.",
+				},
+				"to_ref": {
+					Type:        genai.TypeString,
+					Description: "The ending commit reference for the changelog entry. Leave as empty string.",
 				},
 				"changes": {
 					Type: genai.TypeArray,
@@ -71,8 +79,8 @@ func (c *GeminiAIClient) GenerateChangelogEntry(params GenerateChangelogEntryPar
 					},
 				},
 			},
-			PropertyOrdering: []string{"version", "date", "changes"},
-			Required:         []string{"version", "date", "changes"},
+			PropertyOrdering: []string{"version", "date", "from_ref", "to_ref", "changes"},
+			Required:         []string{"changes"},
 		},
 	}
 

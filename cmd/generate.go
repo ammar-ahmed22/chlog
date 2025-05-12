@@ -67,6 +67,11 @@ var generateCmd = &cobra.Command{
 			return fmt.Errorf("Error generating changelog: %v", err)
 		}
 
+		response.Entry.Version = version
+		response.Entry.Date = flags.Date
+		response.Entry.FromRef = flags.From
+		response.Entry.ToRef = flags.To
+
 		if flags.Verbose {
 			utils.Eprintln("Completed AI changelog generation")
 			utils.Eprintf("tokens used: %d (input: %d, output: %d)\n", response.InputTokens+response.OutputTokens, response.InputTokens, response.OutputTokens)
