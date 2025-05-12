@@ -38,12 +38,6 @@ You are a changelog generation assistant. Based on the provided Git commits and 
 - You can have multiple changes associated with a single commit, up to your discretion.
 - Output must be strictly valid JSON matching the schema. Do not include any explanation or extra text.
 
-## Version:
-%s
-
-## Date:
-%s
-
 ## Git Commits:
 Each commit is shown below with its hash, message, and code diff separated by "--- COMMIT ---".
 
