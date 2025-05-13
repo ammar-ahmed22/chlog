@@ -1,0 +1,103 @@
+[
+  {
+    "version": "0.2.0",
+    "date": "2025-05-12",
+    "from_ref": "v0.1.0",
+    "to_ref": "v0.2.0",
+    "changes": [
+      {
+        "details": "Included provider and model in the verbose output during changelog generation.",
+        "commit_hash": "5debe9f8e69fc48a59af54f31d8f4de4c0d97893",
+        "tags": [
+          "changed"
+        ]
+      },
+      {
+        "details": "Added a flag for specifying an existing changelog file with validation.",
+        "commit_hash": "4e87e99f01e86d7eecd7b7fa6d65044a89334e23",
+        "tags": [
+          "added"
+        ]
+      },
+      {
+        "details": "Implemented the functionality to write a new entry to the existing changelog file when passed as a flag.",
+        "commit_hash": "b1ab77eb1c78df2455dc03c286a7d1c85268c98d",
+        "tags": [
+          "added"
+        ]
+      },
+      {
+        "details": "Updated the command to utilize an optional YAML configuration file to set flag values for changelog generation.",
+        "commit_hash": "c08bd2429546546d992c5364338051d0a5d4edf6",
+        "tags": [
+          "added"
+        ]
+      },
+      {
+        "details": "Modified changelog entry to include version and date manually along with from and to commit references.",
+        "commit_hash": "804391e4e40b0182605b801b7a9d68120c893410",
+        "tags": [
+          "changed"
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.1.0",
+    "date": "2025-01-15",
+    "from_ref": "v0.0.1",
+    "to_ref": "v0.1.0",
+    "changes": [
+      {
+        "details": "Cleaned up comments and added a license file.",
+        "commit_hash": "13f7967b608de842531ea2c4ab8e750228f716ac",
+        "tags": [
+          "added",
+          "changed"
+        ]
+      },
+      {
+        "details": "Added version argument to the generate command.",
+        "commit_hash": "7ac8ef033e0640dceae8c76902eb07a35f3cfa42",
+        "tags": [
+          "added"
+        ]
+      },
+      {
+        "details": "Added date flag to the generate command.",
+        "commit_hash": "7ac8ef033e0640dceae8c76902eb07a35f3cfa42",
+        "tags": [
+          "added"
+        ]
+      },
+      {
+        "details": "Fixed verbose output pipes to stderr.",
+        "commit_hash": "7ac8ef033e0640dceae8c76902eb07a35f3cfa42",
+        "tags": [
+          "fixed"
+        ]
+      },
+      {
+        "details": "Generated JSON changelog with OpenAI.",
+        "commit_hash": "24fced799c5c2a6b22f90b28606c33c9b5e92bfa",
+        "tags": [
+          "added"
+        ]
+      },
+      {
+        "details": "Privatized and renamed generate command flags and added a helper function for stderr printing.",
+        "commit_hash": "fb7665d614270fbb4c39be573f0effe52de404f1",
+        "tags": [
+          "changed"
+        ]
+      },
+      {
+        "details": "Implemented changelog generation with Gemini.",
+        "commit_hash": "febff5a7a85817672c4e576d62772ceb4871586b",
+        "tags": [
+          "added"
+        ]
+      }
+    ]
+  }
+]
