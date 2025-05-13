@@ -13,6 +13,7 @@ type GenerateChangelogEntryParams struct {
 	FromCommit string
 	ToCommit   string
 	Model      string
+	Tags       []string
 }
 
 type GenerateChangelogEntryResponse struct {
@@ -25,17 +26,21 @@ type AIClient interface {
 	GenerateChangelogEntry(params GenerateChangelogEntryParams) (GenerateChangelogEntryResponse, error)
 }
 
+var DefaultTags = []string{"feature", "fix", "improvement", "deprecation", "security", "breaking", "documentation"}
+
 var Prompt = `
-You are a changelog generation assistant. Based on the provided Git commits and their diffs, generate a structured changelog entry that adheres exactly to the JSON schema described below.
+You are a changelog generation assistant. Based on the provided Git commits and their diffs, generate a structured changelog entry that adheres exactly to the JSON schema.
 
 ## Rules:
 - Only use the information provided in the commit messages and diffs.
-- Each change should be a single sentence, start with a past-tense verb, and describe what changed.
+- Each change should include a succint title, a detailed, end-user friendly description, and an impact statement.
 - Each change must be tagged appropriately. Valid tags are:
-  - "added", "changed", "removed", "deprecated", "security", "fixed"
+  - %s
 - Each change must have at least one tag.
-- Each change should include the commit hash associated with it.
+- Each change should include the commit hash or hashes (if multiple) associated with it.
+- Each change must be associated with at least one commit.
 - You can have multiple changes associated with a single commit, up to your discretion.
+- Ordering of changes should be from most recent to oldest (most recent first, oldest last).
 - Output must be strictly valid JSON matching the schema. Do not include any explanation or extra text.
 
 ## Git Commits:
