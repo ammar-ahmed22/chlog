@@ -13,11 +13,11 @@ var rootCmd = &cobra.Command{
 	Short: "Generate AI-powered changelogs from your Git history",
 	Long: `chlog is a command-line tool that uses AI to generate and update structured changelogs from your Git history.
 
-It can automatically summarize changes based on diffs and commit messages and output structured changelogs in various formats, including Markdown and JSON.
+It can automatically summarize changes based on diffs and commit messages and output structured changelogs in JSON formats.
 Use it to keep your changelogs clean, consistent, and up-to-date.
 
 Example:
-	chlog generate --format json --from HEAD~10 --to HEAD --out changelog.json`,
+	chlog generate 0.2.0 --from HEAD~10 --to HEAD > changelog.json`,
 }
 
 func Execute() {

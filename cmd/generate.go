@@ -116,7 +116,7 @@ var generateCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(generateCmd)
 
-	generateCmd.Flags().StringP("config", "c", "", "Path to config file (optional, will be loaded if present in the current directory)")
+	generateCmd.Flags().StringP("config", "c", "", "Path to config file (optional, chlog.yaml will be loaded if present in the current directory)")
 	generateCmd.Flags().StringP("from", "f", "HEAD~1", "Starting commit reference (e.g. HEAD~3, main, v1.0.0, or abc1234)")
 	generateCmd.Flags().StringP("to", "t", "HEAD", "Ending commit reference (e.g. HEAD~3, main, v1.0.0, or abc1234)")
 	generateCmd.Flags().BoolP("verbose", "v", false, "Enable verbose output")
