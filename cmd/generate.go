@@ -72,6 +72,10 @@ var generateCmd = &cobra.Command{
 		response.Entry.Date = flags.Date
 		response.Entry.FromRef = flags.From
 		response.Entry.ToRef = flags.To
+		// Add id to each change
+		for i, change := range response.Entry.Changes {
+			response.Entry.Changes[i].ID = utils.TruncatedKebabCase(change.Title, 40) 
+		}
 
 		if flags.Verbose {
 			utils.Eprintln("Completed AI changelog generation")
