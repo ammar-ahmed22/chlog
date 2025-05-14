@@ -57,6 +57,10 @@ func (c *GeminiAIClient) GenerateChangelogEntry(params GenerateChangelogEntryPar
 					Items: &genai.Schema{
 						Type: genai.TypeObject,
 						Properties: map[string]*genai.Schema{
+							"id": {
+								Type:        genai.TypeString,
+								Description: "The unique identifier of the change. Leave as empty string.",
+							},
 							"title": {
 								Type:        genai.TypeString,
 								Description: "The title of the change. Should be succinct.",
@@ -85,7 +89,7 @@ func (c *GeminiAIClient) GenerateChangelogEntry(params GenerateChangelogEntryPar
 							},
 						},
 						Required:         []string{"title", "description", "impact", "commits", "tags"},
-						PropertyOrdering: []string{"title", "description", "impact", "commits", "tags"},
+						PropertyOrdering: []string{"id", "title", "description", "impact", "commits", "tags"},
 					},
 				},
 			},
