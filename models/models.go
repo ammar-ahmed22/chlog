@@ -5,9 +5,11 @@ import (
 )
 
 type ChangelogChange struct {
-	Details    string   `json:"details" jsonschema:"description=Summarized details of the change. Should only be a single sentence starting with a past-tense verb."`
-	CommitHash string   `json:"commit_hash" jsonschema:"description=The commit hash associated with this change."`
-	Tags       []string `json:"tags" jsonschema:"enum=added,enum=changed,enum=removed,enum=deprecated,enum=security,enum=fixed,description=Tags associated with this change"`
+	Title       string   `json:"title" jsonschema:"description=The title of the change. Should be succint."`
+	Description string   `json:"description" jsonschema:"description=End-user friendly description of the change. Should be more verbose."`
+	Impact      string   `json:"impact" jsonschema:"description=The impact of the change. Describe what and how the change affects the user or usage of the software."`
+	Commits     []string `json:"commits" jsonschema:"description=List of commit hashes associated with this change. Must have at least one value."`
+	Tags        []string `json:"tags" jsonschema:"description=Tags associated with this change"`
 }
 
 type ChangelogEntry struct {

@@ -62,6 +62,7 @@ var generateCmd = &cobra.Command{
 			Model:      flags.Model,
 			Version:    version,
 			Date:       flags.Date,
+			Tags:       ai.DefaultTags,
 		})
 		if err != nil {
 			return fmt.Errorf("Error generating changelog: %v", err)

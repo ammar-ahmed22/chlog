@@ -43,7 +43,7 @@ func (c *OpenAIClient) GenerateChangelogEntry(params GenerateChangelogEntryParam
 	response, err := c.client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
 		Model: params.Model,
 		Messages: []openai.ChatCompletionMessageParamUnion{
-			openai.UserMessage(fmt.Sprintf(Prompt, params.Version, params.Date, historyWithDiff)),
+			openai.UserMessage(fmt.Sprintf(Prompt, params.Tags, historyWithDiff)),
 		},
 		ResponseFormat: openai.ChatCompletionNewParamsResponseFormatUnion{
 			OfJSONSchema: &openai.ResponseFormatJSONSchemaParam{JSONSchema: schemaParam},

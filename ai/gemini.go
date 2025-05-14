@@ -57,25 +57,35 @@ func (c *GeminiAIClient) GenerateChangelogEntry(params GenerateChangelogEntryPar
 					Items: &genai.Schema{
 						Type: genai.TypeObject,
 						Properties: map[string]*genai.Schema{
-							"details": {
+							"title": {
 								Type:        genai.TypeString,
-								Description: "Summarized details of the change. Should only be a single sentence starting with a past-tense verb.",
+								Description: "The title of the change. Should be succinct.",
 							},
-							"commit_hash": {
+							"description": {
 								Type:        genai.TypeString,
-								Description: "The commit hash associated with this change.",
+								Description: "End-user friendly description of the change. Should be more verbose.",
+							},
+							"impact": {
+								Type:        genai.TypeString,
+								Description: "The impact of the change. Describe what and how the change affects the user or usage of the software.",
+							},
+							"commits": {
+								Type:        genai.TypeArray,
+								Description: "List of commit hashes associated with this change. Must have at least one value.",
+								Items: &genai.Schema{
+									Type: genai.TypeString,
+								},
 							},
 							"tags": {
 								Type: genai.TypeArray,
 								Items: &genai.Schema{
 									Type:        genai.TypeString,
-									Enum:        []string{"added", "changed", "removed", "deprecated", "security", "fixed"},
 									Description: "Tags associated with this change",
 								},
 							},
 						},
-						Required:         []string{"details", "commit_hash", "tags"},
-						PropertyOrdering: []string{"details", "commit_hash", "tags"},
+						Required:         []string{"title", "description", "impact", "commits", "tags"},
+						PropertyOrdering: []string{"title", "description", "impact", "commits", "tags"},
 					},
 				},
 			},
@@ -92,7 +102,7 @@ func (c *GeminiAIClient) GenerateChangelogEntry(params GenerateChangelogEntryPar
 	result, err := c.client.Models.GenerateContent(
 		context.Background(),
 		params.Model,
-		genai.Text(fmt.Sprintf(Prompt, params.Version, params.Date, historyWithDiff)),
+		genai.Text(fmt.Sprintf(Prompt, params.Tags, historyWithDiff)),
 		config,
 	)
 	if err != nil {
