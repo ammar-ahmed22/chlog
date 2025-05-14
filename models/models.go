@@ -5,6 +5,7 @@ import (
 )
 
 type ChangelogChange struct {
+	ID          string   `json:"id" jsonschema:"description=The unique identifier of the change. Leave as empty string."`
 	Title       string   `json:"title" jsonschema:"description=The title of the change. Should be succint."`
 	Description string   `json:"description" jsonschema:"description=End-user friendly description of the change. Should be more verbose."`
 	Impact      string   `json:"impact" jsonschema:"description=The impact of the change. Describe what and how the change affects the user or usage of the software."`

@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/ammar-ahmed22/chlog/models"
+	"github.com/samber/lo"
 )
 
 func Eprintln(args ...any) {
@@ -14,6 +16,24 @@ func Eprintln(args ...any) {
 
 func Eprintf(format string, args ...any) {
 	fmt.Fprintf(os.Stderr, format, args...)
+}
+
+func TruncatedKebabCase(s string, maxLen int) string {
+	kebab := lo.KebabCase(s)
+	words := strings.Split(kebab, "-")
+
+	var result strings.Builder
+	for i, word := range words {
+		if result.Len()+len(word) > maxLen {
+			break
+		}
+
+		if i > 0 && result.Len() > 0 {
+			result.WriteString("-")
+		}
+		result.WriteString(word)
+	}
+	return result.String()
 }
 
 func ParseAndValidateChangelogFile(path string) ([]models.ChangelogEntry, error) {
