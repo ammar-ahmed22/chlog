@@ -3,12 +3,16 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/ammar-ahmed22/chlog/ai"
 	"github.com/ammar-ahmed22/chlog/git"
 	"github.com/ammar-ahmed22/chlog/models"
 	"github.com/ammar-ahmed22/chlog/utils"
+	"github.com/briandowns/spinner"
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -45,15 +49,23 @@ var generateCmd = &cobra.Command{
 		}
 
 		if flags.Verbose {
-			utils.Eprintf("Generating changelog entry \"%s\" for commits:\n", version)
+			utils.Eprintf("\u2192 Generating changelog entry %s\n", color.CyanString(version))
+			utils.Eprintln("\u2192 Using commits:")
 			for _, log := range logs {
-				utils.Eprintln(log)
+				parts := strings.SplitN(log, " ", 2)
+				hash := parts[0]
+				message := parts[1]
+				utils.Eprintf(" \u2192 %s %s\n", color.YellowString(hash), message)
 			}
 		}
 
+		spnr := spinner.New(spinner.CharSets[14], 100*time.Millisecond)
+		spnr.Writer = os.Stderr
 		if flags.Verbose {
-			utils.Eprintln("")
-			utils.Eprintf("Starting AI changelog generation (provider: %s, model: %s)\n", flags.Provider, flags.Model)
+			utils.Eprintf("\u2192 Using AI provider: %s\n", color.MagentaString("%s (model: %s)", flags.Provider, flags.Model))
+			spnr.Suffix = fmt.Sprintf(" AI Generating changelog entry...")
+			spnr.Start()
+			defer spnr.Stop()
 		}
 
 		response, err := aiClient.GenerateChangelogEntry(ai.GenerateChangelogEntryParams{
@@ -74,12 +86,15 @@ var generateCmd = &cobra.Command{
 		response.Entry.ToRef = flags.To
 		// Add id to each change
 		for i, change := range response.Entry.Changes {
-			response.Entry.Changes[i].ID = utils.TruncatedKebabCase(change.Title, 40) 
+			response.Entry.Changes[i].ID = utils.TruncatedKebabCase(change.Title, 40)
 		}
 
 		if flags.Verbose {
-			utils.Eprintln("Completed AI changelog generation")
-			utils.Eprintf("tokens used: %d (input: %d, output: %d)\n", response.InputTokens+response.OutputTokens, response.InputTokens, response.OutputTokens)
+			spnr.Stop()
+			utils.Eprintf("%s AI Generated changelog entry\n", color.GreenString("\u2713"))
+			utils.Eprintf("\u2192 Tokens used: %d\n", response.InputTokens+response.OutputTokens)
+			utils.Eprintf(" \u2192 Input: %d\n", response.InputTokens)
+			utils.Eprintf(" \u2192 Output: %d\n", response.OutputTokens)
 		}
 
 		jsonOutput, err := json.Marshal(response.Entry)

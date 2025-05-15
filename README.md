@@ -88,28 +88,54 @@ chlog generate 0.2.0 --from HEAD~1 --to HEAD --pretty --verbose
 ```bash
 > chlog generate 0.2.0 --from HEAD~1 --to HEAD --pretty --verbose
 
-Generating changelog entry "0.2.0" for commits:
-e2078de chore: readme
-
-Starting AI changelog generation (provider: openai, model: gpt-4o-mini)
-Completed AI changelog generation
-tokens used: 1521 (input: 1386, output: 135)
+→ Generating changelog entry 0.2.0
+→ Using commits:
+ → eeb458d feat: add spinner for AI generation and colorizing/prettifying verbose output
+→ Using AI provider: openai (model: gpt-4o-mini)
+✓ AI Generated changelog entry
+→ Tokens used: 4976
+ → Input: 4581
+ → Output: 395
 {
   "version": "0.2.0",
-  "date": "2025-05-14",
+  "date": "2025-05-15",
   "from_ref": "HEAD~1",
   "to_ref": "HEAD",
   "changes": [
     {
-      "id": "update-readme-description",
-      "title": "Update README Description",
-      "description": "The README file was updated to clarify that `chlog` is an AI-powered tool for generating changelogs from Git history. This enhancement aims to better inform users about the primary functionality and capabilities of `chlog`.",
-      "impact": "Users will have a more accurate understanding of what `chlog` does and how it can help them manage changelogs with minimal effort.",
+      "id": "add-spinner-for-ai-generation",
+      "title": "Add Spinner for AI Generation",
+      "description": "A spinner has been added to indicate progress during AI generation of changelog entries, enhancing user experience with visual feedback when the system is processing requests.",
+      "impact": "Users will now see a spinner during the AI generation process, which informs them that the system is actively working, reducing uncertainty during wait times.",
       "commits": [
-        "e2078de294fad79058a6a92d137975b296698682"
+        "eeb458d2913ee5219a16d3503e01639add8fc422"
       ],
       "tags": [
-        "documentation"
+        "feature"
+      ]
+    },
+    {
+      "id": "colorize-and-prettify-verbose-output",
+      "title": "Colorize and Prettify Verbose Output",
+      "description": "Improvements have been made to the verbose output of the changelog generation, including color coding for better visibility and easier reading. This enhancement allows users to better follow the generation process and understand the information presented.",
+      "impact": "Users will find the verbose output more aesthetically pleasing and easier to read, improving the overall interaction with the tool.",
+      "commits": [
+        "eeb458d2913ee5219a16d3503e01639add8fc422"
+      ],
+      "tags": [
+        "improvement"
+      ]
+    },
+    {
+      "id": "fix-git-log-range-output",
+      "title": "Fix Git Log Range Output",
+      "description": "The `LogRange` function has been modified to return a list of commits as separate string entries instead of a single concatenated string. This change improves the clarity and usability of the output, making it easier to process the commit logs programmatically.",
+      "impact": "Users of the `LogRange` function will now receive an array of strings representing individual commits, which enhances integration with other tools or scripts that require specific commit data rather than a single string.",
+      "commits": [
+        "16de327007c90243647e66e3a9c77ee6a36a0466"
+      ],
+      "tags": [
+        "fix"
       ]
     }
   ]
