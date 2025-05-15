@@ -104,7 +104,7 @@ var generateCmd = &cobra.Command{
 
 		if flags.ExistingChangelog != nil {
 			if flags.Verbose {
-				utils.Eprintf("Writing to existing changelog file '%s'\n", flags.ExistingChangelogPath)
+				utils.Eprintf("\u2192 Writing to changelog file '%s'\n", flags.ExistingChangelogPath)
 			}
 
 			// NOTE: Adding the new entry to the beginning. This is not good for performance but OK for POC.
