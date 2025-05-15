@@ -26,7 +26,8 @@ func LogRange(from, to string) ([]string, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Error getting git log: %v", err)
 	}
-	return []string{string(output)}, nil
+	lines := strings.Split(strings.TrimSpace(string(output)), "\n")
+	return lines, nil
 }
 
 func CommitRange(from, to string) ([]string, error) {
