@@ -104,14 +104,25 @@ var generateCmd = &cobra.Command{
 
 		if flags.ExistingChangelog != nil {
 			if flags.Verbose {
-				utils.Eprintf("\u2192 Writing to changelog file '%s'\n", flags.ExistingChangelogPath)
+				if flags.ExistingChangelogInEntries {
+					utils.Eprintf("\u2192 Writing to 'entries' field of changelog file '%s'\n", flags.ExistingChangelogPath)
+				} else {
+					utils.Eprintf("\u2192 Writing to changelog file '%s'\n", flags.ExistingChangelogPath)
+				}
 			}
 
 			// NOTE: Adding the new entry to the beginning. This is not good for performance but OK for POC.
 			updatedChangelog := append([]models.ChangelogEntry{response.Entry}, flags.ExistingChangelog...)
-			err := utils.WriteChangelogFile(flags.ExistingChangelogPath, updatedChangelog)
+			err := utils.WriteChangelogFile(flags.ExistingChangelogPath, flags.ExistingChangelogInEntries, updatedChangelog)
 			if err != nil {
 				return fmt.Errorf("Error writing changelog file '%s': %v", flags.ExistingChangelogPath, err)
+			}
+			if flags.Verbose {
+				if flags.ExistingChangelogInEntries {
+					utils.Eprintf("%s Written to 'entries' field of changelog file '%s'\n", color.GreenString("\u2713"), flags.ExistingChangelogPath)
+				} else {
+					utils.Eprintf("%s Written to changelog file '%s'\n", color.GreenString("\u2713"), flags.ExistingChangelogPath)
+				}
 			}
 		}
 

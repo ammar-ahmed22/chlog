@@ -13,16 +13,17 @@ import (
 )
 
 type GenerateFlags struct {
-	From                  string
-	To                    string
-	Verbose               bool
-	Provider              string
-	Model                 string
-	Date                  string
-	APIKey                string
-	Pretty                bool
-	ExistingChangelog     []models.ChangelogEntry
-	ExistingChangelogPath string
+	From                       string
+	To                         string
+	Verbose                    bool
+	Provider                   string
+	Model                      string
+	Date                       string
+	APIKey                     string
+	Pretty                     bool
+	ExistingChangelog          []models.ChangelogEntry
+	ExistingChangelogInEntries bool
+	ExistingChangelogPath      string
 }
 
 func ParseGenerateFlags(cmd *cobra.Command) (*GenerateFlags, error) {
@@ -59,7 +60,7 @@ func ParseGenerateFlags(cmd *cobra.Command) (*GenerateFlags, error) {
 		return nil, err
 	}
 
-	provider, _, err := GetConfigFlagString(cmd, "provider") 
+	provider, _, err := GetConfigFlagString(cmd, "provider")
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +84,7 @@ func ParseGenerateFlags(cmd *cobra.Command) (*GenerateFlags, error) {
 		model = ai.ProvidersMap[provider][0] // Default to the first model for the provider
 	}
 
-	apiKey, _, err := GetConfigFlagString(cmd, "apiKey") 
+	apiKey, _, err := GetConfigFlagString(cmd, "apiKey")
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +108,7 @@ func ParseGenerateFlags(cmd *cobra.Command) (*GenerateFlags, error) {
 		return nil, fmt.Errorf("Invalid date format '%s'. Use YYYY-MM-DD format", date)
 	}
 
-	pretty, err := GetConfigFlagBool(cmd, "pretty") 
+	pretty, err := GetConfigFlagBool(cmd, "pretty")
 	if err != nil {
 		return nil, err
 	}
@@ -118,6 +119,7 @@ func ParseGenerateFlags(cmd *cobra.Command) (*GenerateFlags, error) {
 	}
 
 	var existingChangelog []models.ChangelogEntry
+	var existingChangelogInEntries bool
 	if file != "" {
 		if fileFromConfig {
 			// Join the config path with the file path
@@ -129,23 +131,23 @@ func ParseGenerateFlags(cmd *cobra.Command) (*GenerateFlags, error) {
 			}
 			file = absPath
 		}
-		existingChangelog, err = ParseAndValidateChangelogFile(file)
+		existingChangelog, existingChangelogInEntries, err = ParseAndValidateChangelogFile(file)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	return &GenerateFlags{
-		From:                  from,
-		To:                    to,
-		Verbose:               verbose,
-		Provider:              provider,
-		Model:                 model,
-		Date:                  date,
-		APIKey:                apiKey,
-		Pretty:                pretty,
-		ExistingChangelog:     existingChangelog,
-		ExistingChangelogPath: file,
+		From:                       from,
+		To:                         to,
+		Verbose:                    verbose,
+		Provider:                   provider,
+		Model:                      model,
+		Date:                       date,
+		APIKey:                     apiKey,
+		Pretty:                     pretty,
+		ExistingChangelog:          existingChangelog,
+		ExistingChangelogInEntries: existingChangelogInEntries,
+		ExistingChangelogPath:      file,
 	}, nil
 }
-

@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -8,6 +9,7 @@ import (
 
 	"github.com/ammar-ahmed22/chlog/models"
 	"github.com/samber/lo"
+	"github.com/tidwall/sjson"
 )
 
 func Eprintln(args ...any) {
@@ -36,7 +38,25 @@ func TruncatedKebabCase(s string, maxLen int) string {
 	return result.String()
 }
 
-func ParseAndValidateChangelogFile(path string) ([]models.ChangelogEntry, error) {
+func hasEntries(contents []byte) (exists bool, entries []models.ChangelogEntry, err error) {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(contents, &raw); err != nil {
+		return false, nil, err
+	}
+
+	rawEntries, exists := raw["entries"]
+	if !exists {
+		return false, nil, nil
+	}
+
+	if err := json.Unmarshal(rawEntries, &entries); err != nil {
+		return false, nil, err
+	}
+
+	return true, entries, nil
+}
+
+func ParseAndValidateChangelogFile(path string) ([]models.ChangelogEntry, bool, error) {
 	_, err := os.Stat(path)
 	if err != nil {
 		// File does not exist, create one
@@ -44,38 +64,67 @@ func ParseAndValidateChangelogFile(path string) ([]models.ChangelogEntry, error)
 			// Create an empty changelog file
 			err := os.WriteFile(path, []byte("[]"), 0644)
 			if err != nil {
-				return nil, fmt.Errorf("Error creating changelog file '%s': %v", path, err)
+				return nil, false, fmt.Errorf("Error creating changelog file '%s': %v", path, err)
 			}
 		} else {
-			return nil, fmt.Errorf("Error checking changelog file '%s': %v", path, err)
+			return nil, false, fmt.Errorf("Error checking changelog file '%s': %v", path, err)
 		}
 	}
 	contents, err := os.ReadFile(path)
 	if err != nil {
-		return nil, fmt.Errorf("Error reading file '%s': %v", path, err)
+		return nil, false, fmt.Errorf("Error reading file '%s': %v", path, err)
 	}
 
 	if len(contents) == 0 {
-		return []models.ChangelogEntry{}, nil
+		return []models.ChangelogEntry{}, false, nil
 	}
 
-	var changelog []models.ChangelogEntry
-	err = json.Unmarshal(contents, &changelog)
+	var changelogEntries []models.ChangelogEntry
+	err = json.Unmarshal(contents, &changelogEntries)
 	if err != nil {
-		return nil, fmt.Errorf("Changelog file '%s' is not valid JSON. See https://github.com/ammar-ahmed22/chlog#changelog-format for the expected format", path)
+		// Check if the file has JSON with "entries" key
+		exists, entries, err := hasEntries(contents)
+		if exists && entries != nil && err == nil {
+			return entries, true, nil
+		}
+		return nil, false, fmt.Errorf("Changelog file '%s' is not valid JSON. See https://github.com/ammar-ahmed22/chlog#-json-format for the expected format", path)
 	}
 
-	return changelog, nil
+	return changelogEntries, false, nil
 }
 
-func WriteChangelogFile(path string, changelog []models.ChangelogEntry) error {
-	contents, err := json.MarshalIndent(changelog, "", "  ")
+func WriteChangelogFile(path string, entriesKey bool, changelog []models.ChangelogEntry) error {
+	newEntries, err := json.MarshalIndent(changelog, "", "  ")
 	if err != nil {
 		return fmt.Errorf("Error marshalling changelog to JSON: %v", err)
 	}
-	err = os.WriteFile(path, contents, 0644)
+	if !entriesKey {
+		err = os.WriteFile(path, newEntries, 0644)
+		if err != nil {
+			return fmt.Errorf("Error writing changelog file '%s': %v", path, err)
+		}
+		return nil
+	}
+	// Write to the "entries" key in the JSON file
+	fileData, err := os.ReadFile(path)
+	if err != nil {
+		return fmt.Errorf("Error reading file '%s': %v", path, err)
+	}
+
+	updatedContents, err := sjson.SetBytes(fileData, "entries", json.RawMessage(newEntries))
+	if err != nil {
+		return fmt.Errorf("Error marshalling changelog to JSON: %v", err)
+	}
+
+	var pretty bytes.Buffer
+	if err := json.Indent(&pretty, updatedContents, "", "  "); err != nil {
+		return fmt.Errorf("Error formatting JSON: %v", err)
+	}
+
+	err = os.WriteFile(path, pretty.Bytes(), 0644)
 	if err != nil {
 		return fmt.Errorf("Error writing changelog file '%s': %v", path, err)
 	}
+
 	return nil
 }
