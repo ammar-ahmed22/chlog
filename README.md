@@ -3,14 +3,13 @@
     <p>AI-powered changelog generation from Git history</p>
 </div>
 
-`chlog` is a CLI tool that uses LLMs to generate clean, structured changelogs based on your Git commits and diffs. It outputs entries in a consistent JSON format. Whether you’re prepping for a release or catching up on recent changes, `chlog` helps you maintain changelogs with minimal manual effort.
+`chlog` is a CLI tool that uses LLMs to generate clean, structured changelogs based on your Git commits and diffs. It outputs entries in a consistent JSON format.
 
 ## Table of Contents
 - [✨ Features](#-features)
 - [📦 Installation](#-installation)
 - [📄 JSON Format](#-json-format)
 - [🚀 Quick Start](#-quick-start)
-  * [Example Output](#example-output)
 - [🔧 Usage](#-usage)
   * [`chlog`](#chlog)
   * [`chlog generate`](#chlog-generate)
@@ -31,15 +30,15 @@ You can install `chlog` with:
 ```bash
 go install github.com/ammar-ahmed22/chlog@latest
 ```
-> [!IMPORTANT]
-> Make sure `$GOPATH/bin` is in your `PATH` to run the `chlog` command.
-
 Alternatively, you can build from source:
 ```bash
 git clone https://github.com/ammar-ahmed22/chlog.git
 cd chlog
 go install ./...
 ```
+
+> [!IMPORTANT]
+> Make sure `$GOPATH/bin` is in your `PATH` to run the `chlog` command when using either installation method.
 ## 📄 JSON Format
 The generated changelog entries are in an opinionated JSON format. Here’s an example of what a changelog entry looks like:
 ```json
@@ -83,8 +82,7 @@ Generate a prettified changelog entry for the last commit with verbose output:
 ```bash
 chlog generate 0.2.0 --from HEAD~1 --to HEAD --pretty --verbose
 ```
-
-### Example Output
+Example output:
 ```bash
 > chlog generate 0.2.0 --from HEAD~1 --to HEAD --pretty --verbose
 
@@ -213,7 +211,7 @@ Flags:
 | `--provider`<br>`-p` | LLM provider to use. <br>See `chlog models` to see available providers (default: `openai`)                      |        ✅        |
 | `--model`<br>`-m`    | LLM model to use. <br>See `chlog models` to see available models for the selected provider                      |        ✅        |
 | `--pretty`           | Format JSON output with indentation                                                                             |        ✅        |
-| `--verbose, -v`      | Output verbose output to `stderr`                                                                               |        ✅        |
+| `--verbose`<br>`-v`      | Output verbose output to `stderr`                                                                               |        ✅        |
 
 > [!IMPORTANT]
 > When `--file` is specified, `chlog` will:
