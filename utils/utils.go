@@ -39,7 +39,16 @@ func TruncatedKebabCase(s string, maxLen int) string {
 func ParseAndValidateChangelogFile(path string) ([]models.ChangelogEntry, error) {
 	_, err := os.Stat(path)
 	if err != nil {
-		return nil, fmt.Errorf("File '%s' does not exist", path)
+		// File does not exist, create one
+		if os.IsNotExist(err) {
+			// Create an empty changelog file
+			err := os.WriteFile(path, []byte("[]"), 0644)
+			if err != nil {
+				return nil, fmt.Errorf("Error creating changelog file '%s': %v", path, err)
+			}
+		} else {
+			return nil, fmt.Errorf("Error checking changelog file '%s': %v", path, err)
+		}
 	}
 	contents, err := os.ReadFile(path)
 	if err != nil {
