@@ -14,6 +14,7 @@
   * [`chlog`](#chlog)
   * [`chlog generate`](#chlog-generate)
     + [Flags](#flags)
+    + [Important Note On `--file`](#important-note-on---file)
     + [Config File](#config-file)
   * [`chlog models`](#chlog-models)
 - [🧠 Design Rationale](#-design-rationale)
@@ -213,12 +214,24 @@ Flags:
 | `--pretty`           | Format JSON output with indentation                                                                             |        ✅        |
 | `--verbose`<br>`-v`      | Output verbose output to `stderr`                                                                               |        ✅        |
 
-> [!IMPORTANT]
-> When `--file` is specified, `chlog` will:
-> - Create an array if the file is empty or does not exist.
-> - Prepend the new entry to the existing array.  
->
-> The existing JSON must adhere to the format specified in the [JSON Format](#-json-format) section.
+#### Important Note On `--file`
+There are a few important things to note about the `--file` flag.
+
+When it is specified, `chlog` will do the following:
+- If the file does not exist or is empty, it will create a new JSON array with your entry.
+- If the file exists and contains a valid JSON array (adhering to the [format](#-json-format)), it will prepend the new entry to that.
+- If the file exists and contains a valid JSON object with a key "entries" that is an array (in the correct [format](#-json-format)), it will prepend the new entry to that array.
+
+Therefore, if you want to include additional fields with your changelog JSON, you can do so by creating a file like:
+```json
+{
+    "title": "...",
+    "description": "...",
+    "any_other_key": "...",
+    "entries": []
+}
+```
+Then, when you run `chlog generate <VERSION> --file ./path/to/file.json`, it will prepend the new entry to the `entries` array.
 
 #### Config File
 You can use a config file (`chlog.yaml` in the current directory) or any other file you specify with the `--config` flag to avoid repeating flags:
