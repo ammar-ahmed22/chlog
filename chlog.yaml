@@ -1,0 +1,5 @@
+provider: openai
+model: gpt-4.1-mini
+file: changelog.json
+pretty: true
+verbose: true
