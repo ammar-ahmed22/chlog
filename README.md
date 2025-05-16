@@ -1,6 +1,9 @@
 <div align="center">
     <h1>chlog</h1>
     <p>AI-powered changelog generation from Git history</p>
+    <div>
+        <img alt="GitHub Release" src="https://img.shields.io/github/v/release/ammar-ahmed22/chlog?style=plastic">
+    </div>
 </div>
 
 `chlog` is a CLI tool that uses LLMs to generate clean, structured changelogs based on your Git commits and diffs. It outputs entries in a consistent JSON format.
@@ -42,6 +45,13 @@ go install ./...
 
 > [!IMPORTANT]
 > Make sure `$GOPATH/bin` is in your `PATH` to run the `chlog` command when using either installation method.
+
+For UNIX users, you can also install via curl:
+```bash
+curl -sSL https://raw.githubusercontent.com/ammar-ahmed22/chlog/main/install.sh | bash
+```
+
+Otherwise, you can install the binaries directly from the [releases page](https://github.com/ammar-ahmed22/chlog/releases)
 
 ## 📄 JSON Format
 The generated changelog entries are in an opinionated JSON format. Here’s an example of what a changelog entry looks like:
