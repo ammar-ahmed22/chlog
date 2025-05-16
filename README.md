@@ -26,6 +26,7 @@
 - Supports yaml config files for repeatable changelog generation
 - Verbose output (without polluting stdout)
 - Configurable model/provider support (currently OpenAI and Gemini)
+- Generate starting changelog file and config interatively
 
 ## 📦 Installation
 You can install `chlog` with:
@@ -66,6 +67,18 @@ The generated changelog entries are in an opinionated JSON format. Here’s an e
     ]
 }
 ```
+
+Using the `chlog init` command will create a changelog file with the following format:
+```json
+{
+    "title": "...",
+    "description": "...",
+    "repository": "...",
+    "entries": []
+}
+```
+
+The `entries` array will be populated with the generated changelog entries when you run the `chlog generate` command with the `--file` flag.
 
 ## 🚀 Quick Start
 Generate a prettified changelog entry for the last commit with verbose output:
