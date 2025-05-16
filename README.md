@@ -12,6 +12,7 @@
 - [🚀 Quick Start](#-quick-start)
 - [🔧 Usage](#-usage)
   * [`chlog`](#chlog)
+  * [`chlog init`](#chlog-init)
   * [`chlog generate`](#chlog-generate)
     + [Flags](#flags)
     + [Important Note On `--file`](#important-note-on---file)
@@ -40,43 +41,31 @@ go install ./...
 
 > [!IMPORTANT]
 > Make sure `$GOPATH/bin` is in your `PATH` to run the `chlog` command when using either installation method.
+
 ## 📄 JSON Format
 The generated changelog entries are in an opinionated JSON format. Here’s an example of what a changelog entry looks like:
 ```json
-  {
+{
     "version": "0.2.0",
     "date": "2025-05-14",
     "from_ref": "v0.1.1",
     "to_ref": "v0.2.0",
     "changes": [
-      {
-        "id": "support-optional-config-file-for-generate",
-        "title": "Support optional config file for generate command flags",
-        "description": "...",
-        "impact": "...",
-        "commits": [
-          "c08bd2429546546d992c5364338051d0a5d4edf6"
-        ],
-        "tags": [
-          "feature"
-        ]
-      },
-      {
-        "id": "add-version-date-and-git-range-to",
-        "title": "Add version, date, and git range to changelog entries manually",
-        "description": "...",
-        "impact": "...",
-        "commits": [
-          "804391e4e40b0182605b801b7a9d68120c893410"
-        ],
-        "tags": [
-          "feature",
-          "changed"
-        ]
-      }
+        {
+            "id": "support-optional-config-file-for-generate",
+            "title": "Support optional config file for generate command flags",
+            "description": "...",
+            "impact": "...",
+            "commits": [
+                "c08bd2429546546d992c5364338051d0a5d4edf6"
+            ],
+            "tags": [
+                "feature"
+            ]
+        }
     ]
-  },
-``` 
+}
+```
 
 ## 🚀 Quick Start
 Generate a prettified changelog entry for the last commit with verbose output:
@@ -175,6 +164,35 @@ Flags:
 
 Use "chlog [command] --help" for more information about a command.
 ```
+
+### `chlog init`
+```bash
+chlog init --help
+```
+
+```bash
+Initialize a new changelog file interactively with metadata fields like title, description, and repository URL.
+
+You can also optionally create a configuration file for the chlog generate command, which includes settings for the generation process, such as the LLM provider, model, API key, and other options to avoid repeating flags during generation.
+
+Usage:
+  chlog init [flags]
+
+Flags:
+  -h, --help   help for init
+```
+
+> [!NOTE]
+> The `chlog init` command will generate a changelog file with the following additional fields:
+> - `title`: Title of the changelog
+> - `description`: Description of the changelog
+> - `repository`: URL of the repository
+> - `entries`: An array of changelog entries (initially empty)
+> 
+> Through this, when the `chlog generate` command is run with the `--file` flag specified to this generated file, it will prepend the new entry to the `entries` array.
+> For more information, see the [note on the `--file` flag](#important-note-on---file).
+>
+> When choosing to create a config file with `chlog init`, it will automatically link the `--file` flag to the generated changelog file. Therefore, you only need to specify the `--config,-c` flag to set the config file path (or name it `chlog.yaml` in the current directory to auto-load it).
 
 ### `chlog generate`
 ```bash

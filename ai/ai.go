@@ -82,6 +82,14 @@ func SupportedProviders() []string {
 	return providers
 }
 
+func SupportedModels(provider string) []string {
+	models, ok := ProvidersMap[provider]
+	if !ok {
+		return []string{}
+	}
+	return models
+}
+
 func IsValidProvider(provider string) bool {
 	_, ok := ProvidersMap[provider]
 	return ok
